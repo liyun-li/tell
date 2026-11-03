@@ -360,7 +360,7 @@ export default {
       B.forEach(b => b.addEventListener('click', () => guess(+b.dataset.b)));
       $('next').addEventListener('click', userNext);
       function cleanup() { ac.abort(); clearTimeout(slowT); zclose(); if (active === ctl) active = null }
-      const ctl = { setLang(l) { L = l === 'zh' ? 'zh' : 'en'; texts() } };
+      const ctl = { setLang(l) { L = l === 'zh' ? 'zh' : 'en'; texts(); diaUI() } };
       active = ctl;
       if (ctx2 && ctx2.signal) { if (ctx2.signal.aborted) { cleanup(); return } ctx2.signal.addEventListener('abort', () => { if (!finished) { finished = true; cleanup() } }, { once: true }) }
 

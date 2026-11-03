@@ -1,6 +1,6 @@
 // TELL. / 破綻 — hub app. Modules live in ../modules/<id>/mod.js (see CONTRACT.md).
 import * as E from './engine.js';
-import SHIP from './ship.js?v=2611040236';
+import SHIP from './ship.js?v=2611040301';
 const V=new URL(import.meta.url).searchParams.get('v')||'0';
 const QS=new URLSearchParams(location.search);
 const LOCAL=/^(localhost|127\.|0\.0\.0\.0|\[::1\])/.test(location.hostname);
@@ -111,7 +111,7 @@ function renderHome(){const d=getDaily(),k=d.order.length,done=d.i>=k;
   b.innerHTML=`<span class="ic" aria-hidden="true">${gicon(id)}</span><span class="nm">${esc(T('solo')(gname(id),best))}</span>`;
   b.onclick=()=>{if(MODS[id]&&MODS[id].state==='fail'){note(T('noneOk'));return}startSolo(id)};return b}));
  const fails=IDS.filter(id=>MODS[id]&&MODS[id].state==='fail');$('note').textContent='';if(fails.length&&fails.length===IDS.length)$('note').textContent=T('noneOk');
- $('hud').textContent='';$('prog').style.width='0'}
+ if($('home').classList.contains('on')){$('hud').textContent='';$('prog').style.width='0'}}
 function note(s){$('note').textContent=s}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function hud(fx){if(!run){$('hud').textContent='';return}const p=E.fmt(total(run.res));const h=$('hud');
@@ -145,9 +145,9 @@ function nextSpec(){
  // rotate through all games before repeating (no back-to-back, avoid the last few)
  const all=okIds();if(!all.length)return null;const rec=run.recent||[];let ok=all.filter(x=>!rec.includes(x));if(!ok.length)ok=all.filter(x=>x!==run.last);if(!ok.length)ok=all;const r=E.rng(`sus|sh|${run.seed}|${run.i}|pick`);
  return {id:ok[r()*ok.length|0],tier:tierAt(run.i),seed:`sus|sh|${run.seed}|${run.i}`}}
-let loopTok=0;
+let loopTok=0,curId=null;
 async function playLoop(){const tok=++loopTok;let skips=0;
- while(run&&tok===loopTok){const sp=nextSpec();if(!sp)break;hud();rhead(sp.id);$('hnext').hidden=true;
+ while(run&&tok===loopTok){const sp=nextSpec();if(!sp)break;curId=sp.id;hud();rhead(sp.id);$('hnext').hidden=true;
   waitUI(T('loading'));const m=await getMod(sp.id);if(tok!==loopTok)return;rhead(sp.id);
   if(m.state==='ok'&&!E.LS.get('intro_'+sp.id)&&introData(sp.id)){await showIntro(sp.id);if(tok!==loopTok)return}
   let res=null,ms=0;
@@ -217,7 +217,7 @@ $('homeBtn').onclick=()=>$('logo').onclick();
 $('logo').onclick=()=>{stopRound();run=null;show('home');renderHome();if(QS.has('daily')||QS.has('play'))history.replaceState(null,'',location.pathname+(QS.get('lang')?'?lang='+QS.get('lang'):''))};
 $('langBtn').onclick=()=>{L=L==='en'?'zh':'en';E.LS.set('lang',L);setLangUI();
  if(curR){curR.ctx2.lang=L;curR.ctx2.t=E.mkT(L);curR.el.lang=L==='zh'?'zh-Hant':'en';try{curR.mod.setLang&&curR.mod.setLang(L)}catch(e){log('setLang',curR.id,'failed:',e&&e.message||e)}}
- if($('play').classList.contains('on')&&run){const sp=run.mode==='daily'?run.order[run.i]:null;const id=curR?curR.id:sp;if(id)rhead(id);hud();drawIntro();$('hnext').textContent=$('hnext').dataset.last?T('results'):T('next')}
+ if($('play').classList.contains('on')&&run){const sp=run.mode==='daily'?run.order[run.i]:null;const id=curR?curR.id:(sp||curId);if(id)rhead(id);const wt=document.querySelector('#stage>.hub-wait>span');if(wt)wt.textContent=T('loading');hud();drawIntro();$('hnext').textContent=$('hnext').dataset.last?T('results'):T('next')}
  if($('home').classList.contains('on'))renderHome();if($('end').classList.contains('on'))renderEnd()};
 $('dailyBtn').onclick=()=>startDaily();$('shuffleBtn').onclick=()=>startShuffle();
 $('shareBtn').onclick=share;
