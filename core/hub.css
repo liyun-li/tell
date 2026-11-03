@@ -83,4 +83,4 @@ a{color:#9fd0ff}
  #end .rank,#end .streak{display:none}}
 /* glue (see NOTES.md): bold the big verdict buttons so their module colours pass WCAG large-text contrast */
 #stage .m-sos .g,#stage .m-cozy .g{font-weight:800}
-.top .logo .dot,#home .big .dot{font-style:normal;margin-left:-.32em}
+.top .logo .dot,#home .big .dot{font-style:normal;margin-left:-.14em}
