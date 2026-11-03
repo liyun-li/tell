@@ -76,7 +76,7 @@ const CSS = `
 .m-plans .mine{font:900 calc(var(--k)*clamp(.72rem,min(3.9cqw,2.8cqh),.94rem)) var(--mono,monospace);color:var(--red)}.m-plans .mine:empty{display:none}
 .m-plans .ans{font:900 calc(var(--k)*clamp(.8rem,min(4.4cqw,3.2cqh),1.06rem)) var(--mono,monospace);color:var(--cy)}
 .m-plans .fact{font-weight:600;font-size:calc(var(--k)*clamp(.7rem,min(3.9cqw,2.7cqh),.95rem));color:#dbe7f7;max-width:30rem;line-height:1.3}
-.m-plans .src{font-size:calc(var(--k)*clamp(.56rem,min(2.9cqw,2cqh),.7rem));color:#9fb3cf;max-width:30rem;line-height:1.3}.m-plans .src a{color:#b9cbe4;padding:10px 3px;margin:0 -3px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.m-plans .src{font-size:calc(var(--k)*clamp(.56rem,min(2.9cqw,2cqh),.7rem));color:#9fb3cf;max-width:30rem;line-height:1.3}.m-plans .src a{color:#b9cbe4;padding:10px 3px 0;margin:0 -3px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
 .m-plans .toast{font:900 calc(var(--k)*clamp(.74rem,2.8cqh,.95rem)) var(--mono,monospace);color:var(--ylw);flex:none}.m-plans .toast:empty{display:none}
 .m-plans .next{flex:none;width:100%;background:var(--ln);color:var(--bg,#0e2a52);border:0;border-radius:calc(var(--radius,.5rem)*.6);font:900 clamp(.95rem,min(5.5cqw,4cqh),1.35rem) var(--mono,monospace);padding:clamp(.35rem,1.8cqh,.8rem);box-shadow:4px 4px 0 #0008;cursor:pointer;margin-top:clamp(.1rem,.6cqh,.3rem)}
 .m-plans .arming{pointer-events:none}

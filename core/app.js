@@ -1,6 +1,6 @@
 // TELL. / 破綻 — hub app. Modules live in ../modules/<id>/mod.js (see CONTRACT.md).
 import * as E from './engine.js';
-import SHIP from './ship.js?v=2611040137';
+import SHIP from './ship.js?v=2611040236';
 const V=new URL(import.meta.url).searchParams.get('v')||'0';
 const QS=new URLSearchParams(location.search);
 const LOCAL=/^(localhost|127\.|0\.0\.0\.0|\[::1\])/.test(location.hostname);
