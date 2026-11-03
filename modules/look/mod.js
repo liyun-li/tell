@@ -1,4 +1,4 @@
-// Look Again / 再看一眼 — hub module (Sus / 有鬼)
+// Look Again / 再看一眼 — hub module (TELL. / 破綻)
 // Data: the live game's cached FBI snapshot (cases.json + img/) on liyun-li.github.io. The client never contacts fbi.gov;
 // fbi.gov / tips.fbi.gov only appear as links the player can choose to open after the reveal.
 // Guardrails kept: missing / parental-kidnapping / seeking-information files are excluded (never scored);

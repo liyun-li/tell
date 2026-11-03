@@ -1,4 +1,4 @@
-// Who Lives Like This? / 誰會住成這樣？ — hub module (Sus / 有鬼)
+// Who Lives Like This? / 誰會住成這樣？ — hub module (TELL. / 破綻)
 // Data: the live game's own round table (inline `const R=[...]` in its index.html) + its img/ folder, same origin.
 import intro from './intro.js';
 const GAME = '/who-lives-like-this/';

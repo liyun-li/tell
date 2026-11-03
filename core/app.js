@@ -1,6 +1,6 @@
-// Sus / 有鬼 — hub app. Modules live in ../modules/<id>/mod.js (see CONTRACT.md).
+// TELL. / 破綻 — hub app. Modules live in ../modules/<id>/mod.js (see CONTRACT.md).
 import * as E from './engine.js';
-import SHIP from './ship.js?v=2611040032';
+import SHIP from './ship.js?v=2611040131';
 const V=new URL(import.meta.url).searchParams.get('v')||'0';
 const QS=new URLSearchParams(location.search);
 const LOCAL=/^(localhost|127\.|0\.0\.0\.0|\[::1\])/.test(location.hostname);
@@ -16,9 +16,9 @@ const META={sos:{icon:'🚩',repo:'scam-or-startup',en:'Scam or Startup?',zh:'�
  crime:{icon:'⚖️',repo:'do-the-crime',en:'Do The Crime',zh:'關多久？'},
  paper:{icon:'🧾',repo:'paper-trail',en:'Paper Trail',zh:'保單疑雲'},
  fake:{icon:'🧪',repo:'',en:'Fake (dev)',zh:'假模組（開發）'}};
-const URL0='https://liyun-li.github.io/sus/';
+const URL0='https://liyun-li.github.io/tell/';
 const S={en:{
- tag:"Six sus games. Spot what's off.",
+ tag:"Everything has a tell. Spot it.",
  daily:(n,k)=>`👀 DAILY MIX #${n}<small>${k} games · same for everyone</small>`,
  dailyRes:(n,i,k)=>`▶ KEEP GOING · MIX #${n}<small>round ${i+1} of ${k}</small>`,
  dailyDone:(n,p,m)=>`✓ MIX #${n} · ${p}/${m}<small>tap for results · new mix at midnight</small>`,
@@ -30,13 +30,13 @@ const S={en:{
  loading:"Loading…",skipped:"Couldn't load that one. Skipping.",noneOk:"Games didn't load. Check your connection and try again.",
  next:"NEXT →",results:"RESULTS →",
  pts:"pts",share:"SHARE",again:"PLAY AGAIN",shuffle2:"🔀 SHUFFLE",home:"← Home",copied:"Copied!",how:"How to play",got:"GOT IT",lifeLost:"−1 life",
- rank:["Easy mark","Side-eye","Sus detector","Bloodhound","Nothing gets past you"],
+ rank:["Easy mark","Side-eye","Lie detector","Bloodhound","Nothing gets past you"],
  streak:n=>`🔥 ${n}-day streak · new mix at midnight`,newBest:"New best!",
  st:{correct:(c,n)=>[`🎯`,`${c}/${n} calls right`],fast:(g,s)=>[`⚡`,`Fastest: ${s}s · ${g}`],slow:(g,s)=>[`🐢`,`Longest stare: ${s}s · ${g}`],
   best:g=>[`👑`,`Your strongest game: ${g}`],worst:g=>[`👻`,`Your nemesis: ${g}`],rounds:n=>[`💀`,`Out after ${n} rounds`],best2:b=>[`🏆`,`Best: ${b}`]},
- sh:(n,p,m)=>`Sus 有鬼 👀 #${n} · ${p}/${m}`,shE:(p,c)=>`Sus 有鬼 👀 Shuffle · ${p} pts in ${c} rounds`,shS:(g,p,c)=>`Sus 有鬼 👀 ${g} · ${p} pts in ${c} rounds`,shStreak:n=>`🔥 ${n}-day streak`
+ sh:(n,p,m)=>`TELL. #${n} · ${p}/${m}`,shE:(p,c)=>`TELL. Shuffle · ${p} pts in ${c} rounds`,shS:(g,p,c)=>`TELL. ${g} · ${p} pts in ${c} rounds`,shStreak:n=>`🔥 ${n}-day streak`
 },zh:{
- tag:"六款小遊戲。哪裡有鬼，你抓得到嗎？",
+ tag:"每一題都有破綻，你看得出來嗎？",
  daily:(n,k)=>`👀 每日挑戰 #${n}<small>${k} 款各一題・大家同一套</small>`,
  dailyRes:(n,i,k)=>`▶ 繼續挑戰 #${n}<small>第 ${i+1}/${k} 回合</small>`,
  dailyDone:(n,p,m)=>`✓ 挑戰 #${n}・${p}/${m} 分<small>點我看結果・午夜換新題</small>`,
@@ -48,11 +48,11 @@ const S={en:{
  loading:"載入中…",skipped:"這款載不出來，先跳過。",noneOk:"遊戲載不出來，檢查網路再試一次。",
  next:"下一題 →",results:"看結果 →",
  pts:"分",share:"分享",again:"再玩一次",shuffle2:"🔀 隨機混搭",home:"← 回首頁",copied:"複製好了！",how:"怎麼玩",got:"懂了",lifeLost:"−1 命",
- rank:["好騙仔","半信半疑","鬼雷達開了","抓鬼高手","什麼都瞞不過你"],
+ rank:["好騙仔","半信半疑","有點東西","抓包高手","什麼都瞞不過你"],
  streak:n=>`🔥 連續 ${n} 天・午夜換新題`,newBest:"新紀錄！",
  st:{correct:(c,n)=>[`🎯`,`答對 ${c}/${n} 題`],fast:(g,s)=>[`⚡`,`最快出手：${s} 秒・${g}`],slow:(g,s)=>[`🐢`,`盯最久：${s} 秒・${g}`],
   best:g=>[`👑`,`最強：${g}`],worst:g=>[`👻`,`你的剋星：${g}`],rounds:n=>[`💀`,`撐了 ${n} 回合`],best2:b=>[`🏆`,`最佳：${b} 分`]},
- sh:(n,p,m)=>`Sus 有鬼 👀 #${n}・${p}/${m}`,shE:(p,c)=>`Sus 有鬼 👀 隨機混搭・${c} 回合 ${p} 分`,shS:(g,p,c)=>`Sus 有鬼 👀 ${g}・${c} 回合 ${p} 分`,shStreak:n=>`🔥 連續 ${n} 天`
+ sh:(n,p,m)=>`破綻 #${n}・${p}/${m}`,shE:(p,c)=>`破綻 隨機混搭・${c} 回合 ${p} 分`,shS:(g,p,c)=>`破綻 ${g}・${c} 回合 ${p} 分`,shStreak:n=>`🔥 連續 ${n} 天`
 }};
 const $=id=>document.getElementById(id);
 let L=E.detectLang(QS);const T=k=>S[L][k];
@@ -102,7 +102,7 @@ const lives=n=>'❤️'.repeat(Math.max(0,n))+'🖤'.repeat(Math.max(0,3-n));
 function show(id){for(const s of ['home','play','end'])$(s).classList.toggle('on',s===id);document.body.dataset.scr=id}
 function setLangUI(){document.documentElement.lang=L==='zh'?'zh-Hant':'en';$('lEn').classList.toggle('on',L==='en');$('lZh').classList.toggle('on',L==='zh');
  $('tag').textContent=T('tag');$('footT').textContent=T('foot');$('aboutL').textContent=T('about');$('tilesL').textContent=T('tilesL');
- document.title=L==='zh'?'有鬼 Sus 👀':'Sus 有鬼 👀'}
+ document.title=L==='zh'?'破綻 TELL.':'TELL. 破綻'}
 function renderHome(){const d=getDaily(),k=d.order.length,done=d.i>=k;
  $('dailyBtn').innerHTML=done?T('dailyDone')(d.n,E.fmt(total(d.res)),maxOf(d.res)):d.i>0?T('dailyRes')(d.n,d.i,k):T('daily')(d.n,k);
  $('shuffleBtn').innerHTML=T('shuffle')(E.LS.get('best_shuffle')||0);

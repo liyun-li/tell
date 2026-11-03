@@ -1,4 +1,4 @@
-// Sus / 有鬼 — shared engine (rng, days, storage, lang, scoring). No DOM.
+// TELL. / 破綻 — shared engine (rng, days, storage, lang, scoring). No DOM.
 export const EPOCH = Date.UTC(2026, 10, 2); // Daily Mix #1 = 2026-11-02 (Taipei)
 export function h32(s){let h=2166136261>>>0;s=String(s);for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
 export function rng(seed){let a=h32(seed);return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
