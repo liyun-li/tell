@@ -1,11 +1,25 @@
 // TELL. / 破綻 — hub app. Modules live in ../modules/<id>/mod.js (see CONTRACT.md).
 import * as E from './engine.js';
-import SHIP from './ship.js?v=2611122112';
+import SHIP from './ship.js?v=2611190238';
 const V=new URL(import.meta.url).searchParams.get('v')||'0';
 const QS=new URLSearchParams(location.search);
 const LOCAL=/^(localhost|127\.|0\.0\.0\.0|\[::1\])/.test(location.hostname);
 const BASE=(QS.get('base')&&LOCAL)?QS.get('base'):(location.hostname==='liyun-li.github.io'?location.origin:'https://liyun-li.github.io');
 const ALL=SHIP;
+// anonymous play stats: whitelisted game events to our own counter. No cookies, no personal data, no fingerprinting.
+// Ids are random strings made here (localStorage/sessionStorage). Off unless on liyun-li.github.io; off for untagged automation. ?t=p1 tags a playtester (?t=off clears).
+const STAT=(()=>{const EP='https://game-stats.coach-backend.workers.dev/e',SRC='tell';
+ const rid=()=>{try{const a=new Uint8Array(12);crypto.getRandomValues(a);return Array.from(a,b=>(b%36).toString(36)).join('')}catch(e){return (Math.random().toString(36).slice(2)+'000000').slice(0,12)}};
+ let ls=null,ss=null;try{ls=localStorage;ss=sessionStorage}catch(e){}
+ const g=(s,k)=>{try{return s?s.getItem(k):null}catch(e){return null}},p=(s,k,v)=>{try{if(s){v==null?s.removeItem(k):s.setItem(k,v)}}catch(e){}};
+ if(QS.has('t')){const t=(QS.get('t')||'').toLowerCase();p(ls,'stats_t',/^[a-z0-9_-]{1,16}$/.test(t)&&t!=='off'?t:null)}
+ let u=g(ls,'stats_u_'+SRC);const had=!!u||!!g(ls,'sus_daily')||!!g(ls,'sus_gstats');
+ if(!u){u=rid();p(ls,'stats_u_'+SRC,u)}
+ let sid=g(ss,'stats_s_'+SRC),r=g(ss,'stats_r_'+SRC);if(!sid){sid=rid();r=had?'1':'0';p(ss,'stats_s_'+SRC,sid);p(ss,'stats_r_'+SRC,r)}
+ function send(e,o){try{const t=g(ls,'stats_t')||'';if(location.hostname!=='liyun-li.github.io'||(navigator.webdriver&&!t))return;
+  const b=JSON.stringify(Object.assign({s:SRC,u,i:sid,r:r==='1'?1:0,t,l:L,e},o||{}));
+  if(navigator.sendBeacon&&navigator.sendBeacon(EP,b))return;fetch(EP,{method:'POST',body:b,keepalive:true,credentials:'omit'}).catch(()=>{})}catch(e){}}
+ return {send,rid}})();
 // dev only: ?dev=fake (localhost) swaps in the fake module from /dev; never on production
 const DEV=LOCAL&&QS.get('dev')?QS.get('dev').split(','):[];
 const IDS=(LOCAL&&QS.get('only'))?QS.get('only').split(','):(DEV.length?[...DEV,...ALL]:ALL);
@@ -134,9 +148,9 @@ function rhead(id){const k=run.mode==='daily'?T('round')(run.i+1,run.order.lengt
 function waitUI(msg){const w=document.createElement('div');w.className='hub-wait';w.innerHTML=`<div class="hub-spin" aria-hidden="true"></div><span>${esc(msg)}</span>`;$('stage').replaceChildren(w)}
 
 // ---- runs ----
-function startDaily(){run=getDaily();E.LS.set('daily',run);if(run.i>=run.order.length)return endRun();show('play');playLoop()}
-function startShuffle(){run={mode:'shuffle',seed:(Math.random()*1e9|0),i:0,res:[],lives:3,last:null};show('play');playLoop()}
-function startSolo(id){run={mode:'solo',gid:id,seed:(Math.random()*1e9|0),i:0,res:[],lives:3};show('play');playLoop()}
+function startDaily(){run=getDaily();E.LS.set('daily',run);if(run.i>=run.order.length)return endRun(true);if(!run.x){run.x=STAT.rid();E.LS.set('daily',run)}STAT.send('start',{m:'daily',x:run.x,n:run.i});show('play');playLoop()}
+function startShuffle(){run={mode:'shuffle',seed:(Math.random()*1e9|0),i:0,res:[],lives:3,last:null,x:STAT.rid()};STAT.send('start',{m:'shuffle',x:run.x,n:0});show('play');playLoop()}
+function startSolo(id){run={mode:'solo',gid:id,seed:(Math.random()*1e9|0),i:0,res:[],lives:3,x:STAT.rid()};STAT.send('start',{m:'solo',g:id,x:run.x,n:0});show('play');playLoop()}
 function okIds(){return IDS.filter(id=>(id!=='fake'||DEV.includes('fake'))&&!(MODS[id]&&MODS[id].state==='fail'))}
 function nextSpec(){
  if(run.mode==='daily'){if(run.i>=run.order.length)return null;const id=run.order[run.i];return {id,tier:DTIERS[Math.min(run.i,5)],seed:`sus|${run.day}|${id}|${run.i}`}}
@@ -158,7 +172,7 @@ async function playLoop(){const tok=++loopTok;let skips=0;
    if(run.mode==='daily'){run.res[run.i]={id:sp.id,skip:true};run.i++;E.LS.set('daily',run);continue}
    if(run.mode==='solo'||skips>6){run.lives=0;break}
    run.last=sp.id;continue}
-  skips=0;run.res[run.i]=res;run.i++;let fx='pop';if(run.mode!=='daily'){run.last=sp.id;run.recent=[...(run.recent||[]),sp.id].slice(-Math.max(1,okIds().length-2));if(!res.correct){run.lives--;fx='hurt';$('live').textContent=T('lifeLost')}}
+  STAT.send('round',{m:run.mode,x:run.x||'',g:sp.id,n:run.i,k:res.correct?1:0,h:res.h});skips=0;run.res[run.i]=res;run.i++;let fx='pop';if(run.mode!=='daily'){run.last=sp.id;run.recent=[...(run.recent||[]),sp.id].slice(-Math.max(1,okIds().length-2));if(!res.correct){run.lives--;fx='hurt';$('live').textContent=T('lifeLost')}}
   if(run.mode==='daily')E.LS.set('daily',run);bumpStats(res);hud(fx)}
  if(tok===loopTok&&run)endRun()}
 function rkey(x){const v=x&&(x.id??x.key??x.slug??x.name);return String(v!=null&&typeof v!=='object'?v:E.h32(JSON.stringify(x).slice(0,400)))}
@@ -175,7 +189,7 @@ if(round==null)throw new Error('pick returned nothing');
  if(res==='abort'||tok!==loopTok)return 'abort';
  const ms=Math.round(performance.now()-t0);
  if(!res||typeof res!=='object')throw new Error('render resolved without result');
- const n=E.norm(res);const out={id:sp.id,n,correct:!!res.correct,grid:String(res.grid||''),ms,sum_en:res.summary_en||'',sum_zh:res.summary_zh||'',tier:sp.tier};
+ const n=E.norm(res);const out={id:sp.id,n,correct:!!res.correct,grid:String(res.grid||''),ms,sum_en:res.summary_en||'',sum_zh:res.summary_zh||'',tier:sp.tier,h:'hint' in res?(res.hint?1:0):null};
  if(res.useHubNext){const last=run.mode==='daily'?run.i+1>=run.order.length:(run.lives-(out.correct?0:1))<=0;const b=$('hnext');b.dataset.last=last?'1':'';b.textContent=last?T('results'):T('next');b.hidden=false;hold(350);
   const go=await Promise.race([new Promise(ok=>{b.onclick=()=>ok('go')}),aborted]);b.onclick=null;b.hidden=true;if(go==='abort'||tok!==loopTok)return 'abort'}
  curR=null;return out}
@@ -184,7 +198,8 @@ function bumpStats(r){const g=E.LS.get('gstats')||{};const s=g[r.id]||{n:0,p:0};
 
 // ---- end ----
 let lastEnd=null;
-function endRun(){const R=run;stopRound();show('end');hold(500);const res=R.res.filter(x=>x&&!x.skip),p=E.fmt(total(R.res)),m=maxOf(R.res);
+function endRun(review){const R=run;stopRound();show('end');hold(500);const res=R.res.filter(x=>x&&!x.skip),p=E.fmt(total(R.res)),m=maxOf(R.res);
+ if(!review)STAT.send('end',{m:R.mode,x:R.x||'',g:R.mode==='solo'?R.gid:'',n:res.length,v:Math.round(total(R.res))});
  let streakN=0,isBest=false;
  if(R.mode==='daily'){const ds=E.LS.get('dstats')||{};if(ds.last!==R.day){ds.streak=ds.last===E.prevDay(R.day)?(ds.streak||0)+1:1;ds.last=R.day;ds.played=(ds.played||0)+1;E.LS.set('dstats',ds)}streakN=ds.streak||1}
  else{const k=R.mode==='solo'?'best_'+R.gid:'best_shuffle';const b=E.LS.get(k)||0;if(total(R.res)>b){E.LS.set(k,Math.round(total(R.res)*10)/10);isBest=total(R.res)>0}}
@@ -203,7 +218,7 @@ function renderEnd(){if(!lastEnd)return;const {R,p,m,streakN,isBest}=lastEnd;con
  $('shareBtn').textContent=T('share');$('homeBtn').textContent=T('home');$('againBtn').textContent=R.mode==='daily'?T('shuffle2'):T('again');$('toast').textContent='';
  $('hud').textContent=R.mode==='daily'?`#${R.n}`:''}
 function gridText(R){const rs=R.res.filter(Boolean);return rs.map(x=>gicon(x.id)).join('')+'\n'+rs.map(x=>x.skip?'⬜':E.sq(x.n)).join('')}
-async function share(){if(!lastEnd)return;const {R,p,m,streakN}=lastEnd;const res=R.res.filter(x=>x&&!x.skip);
+async function share(){if(!lastEnd)return;const {R,p,m,streakN}=lastEnd;STAT.send('share',{m:R.mode,x:R.x||''});const res=R.res.filter(x=>x&&!x.skip);
  const head=R.mode==='daily'?T('sh')(R.n,p,m):R.mode==='solo'?T('shS')(gname(R.gid),p,res.length):T('shE')(p,res.length);
  const txt=[head,gridText(R),R.mode==='daily'&&streakN>1?T('shStreak')(streakN):'',URL0+(R.mode==='daily'?'?daily':'')].filter(Boolean).join('\n');
  try{if(navigator.share&&/Mobi|Android/i.test(navigator.userAgent)){await navigator.share({text:txt});return}}catch(e){if(e&&e.name==='AbortError')return}
@@ -223,5 +238,5 @@ $('dailyBtn').onclick=()=>startDaily();$('shuffleBtn').onclick=()=>startShuffle(
 $('shareBtn').onclick=share;
 $('againBtn').onclick=()=>{const R=lastEnd&&lastEnd.R;if(!R||R.mode==='daily')startShuffle();else if(R.mode==='solo')startSolo(R.gid);else startShuffle()};
 window.addEventListener('error',e=>log('error',e.message));window.addEventListener('unhandledrejection',e=>log('rejection',e.reason&&e.reason.message||e.reason));
-setLangUI();renderHome();probe();
+setLangUI();renderHome();probe();STAT.send('view');
 if(QS.has('daily'))startDaily();else if(QS.get('play')&&IDS.includes(QS.get('play')))startSolo(QS.get('play'));
