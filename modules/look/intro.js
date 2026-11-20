@@ -1,9 +1,9 @@
 // How-to-play card for Look Again (hub intro hook, see CONTRACT.md). Static, no case data, no photo.
 const TX = {
   en: { title: '🔎 Look Again', chips: ['Violent', 'White-collar', 'Cyber', 'Terror'],
-    steps: ['A real FBI wanted poster. Just the face.', 'Guess which FBI list they’re on. One tap.', 'Gut call: +3. After a 💡 peek at a clue: +1.'] },
+    steps: ['A real U.S. wanted poster. Just the face.', 'Guess what they’re wanted for. One tap.', 'Gut call: +3. After a 💡 peek at a clue: +1.'] },
   zh: { title: '🔎 再看一眼', chips: ['暴力', '白領', '網路', '恐攻'],
-    steps: ['一張真實的 FBI 通緝照，只看臉。', '猜 FBI 把這個人歸在哪一類，點一下就好。', '憑直覺猜中 +3；偷看 💡 線索再猜中 +1。'] }
+    steps: ['一張真實的美國通緝照，只看臉。', '猜這個人涉嫌什麼，點一下就好。', '憑直覺猜中 +3；偷看 💡 線索再猜中 +1。'] }
 };
 function example(t) {
   const b = (e, s) => `<span style="padding:.35em .4em;border-radius:.45em;background:#1b2027;border:1px solid #ffffff38;color:#eef0f2">${e} ${s}</span>`;
