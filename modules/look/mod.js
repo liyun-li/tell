@@ -11,22 +11,22 @@ const GMAP = { violent: 'violent', topten: 'violent', gangs: 'gangs', money: 'mo
 const NEVER = new Set(['missing', 'parental', 'seeking']);
 const GROUPS = ['violent', 'gangs', 'money', 'cyber', 'spy', 'terror'];
 const CAT = {
-  violent: { e: '🔪', en: 'Violent crime', zh: '暴力犯罪' }, gangs: { e: '💊', en: 'Gangs & cartels', zh: '幫派與販毒' },
-  money: { e: '💸', en: 'Fraud & money', zh: '詐騙與洗錢' }, cyber: { e: '💻', en: 'Hacking', zh: '駭客入侵' },
-  spy: { e: '🕵️', en: 'Spies & foreign agents', zh: '間諜與境外勢力' }, terror: { e: '💣', en: 'Terrorism', zh: '恐怖主義' }
+  violent: { e: '🔪', en: 'Violent crime', zh: '暴力犯罪' }, gangs: { e: '🕴️', en: 'Criminal enterprise', zh: '犯罪集團' },
+  money: { e: '💸', en: 'White-collar crime', zh: '白領犯罪' }, cyber: { e: '💻', en: 'Cyber crime', zh: '網路犯罪' },
+  spy: { e: '🕵️', en: 'Counterintelligence', zh: '反情報（間諜）' }, terror: { e: '💣', en: 'Terrorism', zh: '恐怖主義' }
 };
 const S = {
-  en: { q: 'Wanted for…?', peek: '💡 Peek at a clue', cost: '+3 → +1', peeked: 'Clue used · now +1',
+  en: { q: 'The FBI files them under…?', peek: '💡 Peek at a clue', cost: '+3 → +1', peeked: 'Clue used · now +1',
     right: p => `✓ Called it! +${p}`, wrong: '✗ Your gut lied', wantedFor: 'Wanted for', more: n => ` (+${n} more)`,
     tip: 'Seen them? Tip the FBI ↗', full: 'Full poster', fbi: 'FBI page ↗', next: 'NEXT →', lgWanted: 'Allegations only. Presumed innocent until proven guilty.',
     noPic: 'Photo unavailable', enNote: 'FBI wording:', photo: 'Wanted poster photo',
-    fullFiled: 'FBI list', fullDesc: 'Charges', fullText: 'Details (FBI wording)', fullRm: 'Remarks', fullRw: 'Reward', cutNote: 'Physical descriptions are left out here. The FBI page has the full poster.',
+    fullFiled: 'FBI list', onList: 'FBI list:', fullDesc: 'Charges', fullText: 'Details (FBI wording)', fullRm: 'Remarks', fullRw: 'Reward', cutNote: 'Physical descriptions are left out here. The FBI page has the full poster.',
     close: 'Close', redacted: 'redacted', said: 'you said' },
-  zh: { q: '通緝罪名是？', peek: '💡 偷看線索', cost: '+3 → +1', peeked: '已看線索・現在 +1',
+  zh: { q: 'FBI 把這個人歸在哪一類？', peek: '💡 偷看線索', cost: '+3 → +1', peeked: '已看線索・現在 +1',
     right: p => `✓ 一眼看穿！+${p}`, wrong: '✗ 被直覺騙了', wantedFor: '涉嫌', more: n => `（另有 ${n} 項）`,
     tip: '見過這個人？向 FBI 報案 ↗', full: '完整公告', fbi: 'FBI 頁面 ↗', next: '下一題 →', lgWanted: '僅為指控，未經定罪前推定無罪。',
     noPic: '照片無法顯示', enNote: 'FBI 原文：', photo: '通緝照',
-    fullFiled: 'FBI 名單', fullDesc: '罪名', fullText: '案情（FBI 英文原文）', fullRm: '備註', fullRw: '懸賞', cutNote: '此處略去外貌描述；完整公告請見 FBI 官方頁面。',
+    fullFiled: 'FBI 名單', onList: 'FBI 名單：', fullDesc: '罪名', fullText: '案情（FBI 英文原文）', fullRm: '備註', fullRw: '懸賞', cutNote: '此處略去外貌描述；完整公告請見 FBI 官方頁面。',
     close: '關閉', redacted: '已塗黑', said: '你猜' }
 };
 // Charge headline + zh gist, derived only from the FBI poster's own charge text (r.d) or first sentence (r.t).
@@ -107,6 +107,7 @@ const CSS = `
 .m-look .rname{font:800 clamp(.58rem,min(3.1cqw,2.4cqh),.8rem) var(--mono,monospace);color:var(--mut2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .m-look .rcat{font:900 clamp(1rem,min(6cqw,4.4cqh),1.55rem)/1.15 var(--sans,sans-serif)}
 .m-look .rcat s{font-size:.6em;font-weight:700;color:var(--mut2);margin-left:.3em;white-space:nowrap}
+.m-look .rcat .fl{display:block;font-size:.55em;font-weight:700;color:var(--mut2);white-space:normal;margin-top:.15em}
 .m-look .rhead{font:700 clamp(.72rem,min(3.9cqw,2.9cqh),.98rem)/1.3 var(--sans,sans-serif);display:flex;flex-direction:column;gap:.1em}
 .m-look .rhead .en{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .m-look .rhead b{color:#a23a31}.m-look .rhead small{font-weight:600;color:var(--mut2)}
@@ -150,8 +151,11 @@ const hl = (x, L) => esc(x).replace(/▇+/g, m => `<mark aria-label="${S[L].reda
 const cluesOf = (c, L) => { const f = c.k && c.k.cl && (c.k.cl[L] || c.k.cl.en); return Array.isArray(f) ? f.filter(x => typeof x === 'string' && x.trim()) : [] };
 const nameOf = c => (c.title || '').split(/ - | – /)[0];
 const titleCase = s => s.toLowerCase().replace(/(^|[\s\-'"(])(\p{L})/gu, (m, a, b) => a + b.toUpperCase());
-const grp = c => GMAP[c.c];
-function grpSet(c) { const s = new Set([grp(c)]); for (const a of c.all || []) if (GMAP[a]) s.add(GMAP[a]); return s }
+// Categories = the FBI's own crime lists. cases.json g = the answer, m = every category the case defensibly matches
+// (built by look-again tools/cats.py). Options = the answer + categories outside m only, so two can never both be right.
+const grp = c => c.g;
+function grpSet(c) { return new Set([c.g, ...(c.m || [])]) }
+const freeOf = (c, groups) => { const s = grpSet(c); return groups.filter(x => !s.has(x)) };
 let active = null;
 
 export default {
@@ -166,12 +170,13 @@ export default {
       catch (e) { err = e; await new Promise(r => setTimeout(r, 600 * (k + 1))) }
     }
     if (!d || !d.cases || !d.cases.length) throw err || new Error('empty');
-    const cases = d.cases.filter(c => c && c.id && c.im && c.fq === 1 && GMAP[c.c] && !NEVER.has(c.c) && !(c.all || []).some(a => NEVER.has(a))
+    let cases = d.cases.filter(c => c && c.id && c.im && c.fq === 1 && GROUPS.includes(c.g) && Array.isArray(c.m) && !NEVER.has(c.c) && !(c.all || []).some(a => NEVER.has(a))
       && c.r && /^https:\/\/www\.fbi\.gov\//.test(c.url || ''))
       .sort((a, b) => a.id < b.id ? -1 : 1)
       .map(c => Object.assign({}, c, { _g: grp(c), _t: tierOf(c, grp(c)) }));
-    if (!cases.length) throw new Error('empty');
     const groups = GROUPS.filter(g => cases.some(c => c._g === g));
+    cases = cases.filter(c => freeOf(c, groups).length >= 2);
+    if (!cases.length) throw new Error('empty');
     return { base, cases, groups, updated: d.updated };
   },
   pick(pool, rng, tier) {
@@ -181,8 +186,7 @@ export default {
     const g = gs[Math.floor(rng() * gs.length) % gs.length];
     const L = pool.cases.filter(c => c._g === g && (!byT || c._t === t));
     const c = L[Math.floor(rng() * L.length) % L.length];
-    const set = grpSet(c);
-    const d = pool.groups.filter(x => !set.has(x));
+    const d = freeOf(c, pool.groups);
     for (let i = d.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [d[i], d[j]] = [d[j], d[i]] }
     const opts = [g, ...d.slice(0, 3)];
     for (let i = opts.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [opts[i], opts[j]] = [opts[j], opts[i]] }
@@ -250,7 +254,7 @@ export default {
         if (first) { const st = document.createElement('span'); st.className = 'stamp ' + (ok ? 'ok' : 'no'); st.setAttribute('aria-hidden', 'true'); st.textContent = ok ? `+${res.points}` : '✗'; $('pic').appendChild(st) }
         $('verdict').textContent = ok ? T('right')(res.points) : T('wrong'); $('verdict').className = 'verdict ' + (ok ? 'ok' : 'no');
         $('rname').textContent = titleCase(nameOf(c)); im.alt = titleCase(nameOf(c));
-        $('rcat').innerHTML = `<span aria-hidden="true">${CAT[g].e}</span> ${esc(CAT[g][L])}` + (ok ? '' : ` <s>${esc(CAT[pick].e + ' ' + CAT[pick][L])}</s>`);
+        $('rcat').innerHTML = `<span aria-hidden="true">${CAT[g].e}</span> ${esc(CAT[g][L])}` + (ok ? '' : ` <s>${esc(CAT[pick].e + ' ' + CAT[pick][L])}</s>`) + (c.sj && c.sj.length ? `<small class="fl">${esc(T('onList'))} <span lang="en">${esc(c.sj.join(' · '))}</span></small>` : '');
         let h = '';
         if (L === 'zh') { h += `<span class="zh"><b>${esc(ch.q ? 'FBI 要約談' : T('wantedFor'))}</b>${ch.zh ? '：' + esc(ch.zh) : ''}</span><span class="en" lang="en"><i>${esc(T('enNote'))}</i> ${esc(ch.head)}${ch.more ? esc(S.en.more(ch.more)) : ''}</span>` }
         else h += `<span class="en"><b>${ch.q ? '' : esc(T('wantedFor')) + ': '}</b>${esc(ch.head)}${ch.more ? `<small>${esc(T('more')(ch.more))}</small>` : ''}</span>`;
@@ -266,7 +270,7 @@ export default {
       }
       function fullPoster() {
         const r = c.r || {}; let h = '';
-        h += `<h3>${esc(T('fullFiled'))}</h3><p>${esc(CAT[g].e + ' ' + CAT[g][L])}</p>`;
+        h += `<h3>${esc(T('fullFiled'))}</h3><p>${esc(CAT[g].e + ' ' + CAT[g][L])}${c.sj && c.sj.length ? ` · <span lang="en">${esc(c.sj.join(' · '))}</span>` : ''}</p>`;
         if (r.w) h += `<p class="wn" lang="en">${esc(r.w)}</p>`;
         if (r.d) h += `<h3>${esc(T('fullDesc'))}</h3><p lang="en">${esc(r.d)}</p>`;
         if (r.t && r.t.length) h += `<h3>${esc(T('fullText'))}</h3>` + r.t.map(s => `<p lang="en">${esc(s)}</p>`).join('');
