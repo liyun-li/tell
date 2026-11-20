@@ -1,1 +1,1 @@
-export default ['look'];
+export default ['sos','cozy','plans','look','crime','paper'];
